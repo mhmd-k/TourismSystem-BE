@@ -22,25 +22,25 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json($validator->errors(), Response::HTTP_BAD_REQUEST);
+                return response()->json(['error' => $validator->errors()->first(), 'status' => 400], Response::HTTP_BAD_REQUEST);
             }
 
             // Create the user
             $user = new User();
             $user->name = $request->name;
             $user->email = $request->email;
-            $user->password = $request->password;
+            $user->password = Hash::make($request->password);
             $user->save();
 
 
-            return response()->json(['message' => 'User registered successfully', 'user' => $user], Response::HTTP_CREATED);
+            return response()->json(['message' => 'User registered successfully', 'userId' => $user->id, 'status' => 200], Response::HTTP_CREATED);
         } catch (ValidationException $e) {
-            return response()->json(['error' => 'some information are not valid'], Response::HTTP_BAD_REQUEST);
+            return response()->json(['error' => 'some information are not valid', 'status' => 400], Response::HTTP_BAD_REQUEST);
         } catch (\Exception $e) {
             // Log the exception message for debugging
             \Log::error('User registration error: ' . $e->getMessage());
 
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(['error' => $e->getMessage(), 'status' => 500], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
