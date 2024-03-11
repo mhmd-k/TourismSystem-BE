@@ -23,8 +23,8 @@ class UserController extends Controller
 
             if ($validator->fails()) {
                 return response()->json([
+                    'success' => false,
                     'message' => $validator->errors()->first(),
-                    'status' => 400
                 ], Response::HTTP_BAD_REQUEST);
             }
 
@@ -39,26 +39,24 @@ class UserController extends Controller
 
             return response()->json([
                 'message' => 'User registered successfully',
-                'status' => 200,
-                'data' => [
-                    'username' => $user->name,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
                     'email' => $user->email,
                     'image' => null,
                     'token' => $token,
-                ],
-            ], Response::HTTP_CREATED);
+                ]
+            ], Response::HTTP_OK);
         } catch (ValidationException $e) {
 
             return response()->json([
                 'message' => 'some information are not valid',
-                'status' => 400
             ], Response::HTTP_BAD_REQUEST);
         } catch (\Exception $e) {
-            // Log the exception message for debugging
-            \Log::error('User registration error: ' . $e->getMessage());
+            // \Log::error('User registration error: ' . $e->getMessage());
 
             return response()->json(
-                ['message' => $e->getMessage(), 'status' => 500],
+                ['message' => $e->getMessage()],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }
@@ -77,7 +75,6 @@ class UserController extends Controller
                 return response()->json(
                     [
                         'message' => $validator->errors()->first(),
-                        'status' => 400
                     ],
                     Response::HTTP_BAD_REQUEST
                 );
@@ -92,26 +89,24 @@ class UserController extends Controller
 
                 return response()->json([
                     "message" => "Login successful! Welcome back.",
-                    "status" => Response::HTTP_OK,
-                    'data' => [
-                        'username' => $user->name,
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
                         'email' => $user->email,
                         'image' => null,
                         'token' => $token,
                     ],
-                ]);
+                ], Response::HTTP_OK);
             } else {
                 return response()->json([
                     "message" => "Wrong email or password",
-                    "status" => Response::HTTP_BAD_REQUEST
-                ]);
+                ], Response::HTTP_BAD_REQUEST);
             }
 
         } catch (ValidationException $e) {
             return response()->json(
                 [
                     'message' => $e->getMessage(),
-                    'status' => Response::HTTP_BAD_REQUEST
                 ],
                 Response::HTTP_BAD_REQUEST
             );
