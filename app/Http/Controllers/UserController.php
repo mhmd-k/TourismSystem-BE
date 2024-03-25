@@ -8,9 +8,13 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
+
     public function signup(Request $request)
     {
 
@@ -109,6 +113,60 @@ class UserController extends Controller
                     'message' => $e->getMessage(),
                 ],
                 Response::HTTP_BAD_REQUEST
+            );
+        }
+    }
+
+    public function upload_image(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'userId' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => 'image not valid'], 400);
+        }
+        $user = User::where('id', '=', $request->userId)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        try {
+            // Check if the user already has a profile picture
+            if ($user->image_refrence) {
+                Storage::delete($user->image_refrence);
+
+                $path = $request->file('image')->store('profile_pictures');
+                $user->image_refrence = $path;
+                $user->save();
+
+                $imageUrl = Storage::url($path);
+
+                return response()->json([
+                    'image' => $imageUrl,
+                    'message' => 'Profile picture updated successfully.'
+                ], 200);
+            }
+
+            // User doesn't have a profile picture, handle the first-time upload logic here
+            $path = $request->file('image')->store('profile_pictures');
+
+            // Update the user's profile picture field in the database
+            $user->image_refrence = $path;
+            $user->save();
+
+            $imageUrl = Storage::url($path);
+
+            return response()->json([
+                'image' => $imageUrl,
+                'message' => 'Profile picture uploaded successfully.'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(
+                ['message' => 'An error occurred while uploading the image.'],
+                500
             );
         }
     }
