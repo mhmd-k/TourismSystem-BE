@@ -167,7 +167,12 @@ return [
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
+        App\Providers\Filament\AdminPanelProvider::class,
         App\Providers\RouteServiceProvider::class,
+        Reliese\Coders\CodersServiceProvider::class,
+        Laravel\Sanctum\SanctumServiceProvider::class,
+        Noweh\Dijkstra\DijkstraServiceProvider::class
+    
     ])->toArray(),
 
     /*

@@ -10,18 +10,38 @@ class Trip extends Model
     use HasFactory;
 
     protected $table = 'trip';
-
-    public $timestamps = false;
-
     protected $fillable = [
-        'country',
         'user_id',
-        'from_city',
+        'trip_name',
+        'country',
+        'status',
+        'total_cost',
+        'form_city',
         'number_of_people',
         'number_of_days',
         'budget',
-        'preferred_food',
         'transportation',
-        'flight_id'
+        'trip_cost'
     ];
+
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class, 'country', 'country_name');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function tripDays()
+    {
+        return $this->hasMany(TripDay::class, 'trip_id', 'id');
+    }
+
+    public function hotelsReservations()
+    {
+        return $this->hasMany(HotelReservation::class, 'trip_id', 'id');
+    }
 }

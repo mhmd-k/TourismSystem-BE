@@ -7,14 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
-
     public function signup(Request $request)
     {
 
@@ -33,29 +30,30 @@ class UserController extends Controller
             }
 
             // Create the user
-            $user = new User();
-            $user->name = $request->name;
-            $user->email = $request->email;
-            $user->password = Hash::make($request->password);
-            $user->save();
-
-            $token = base64_encode($request->name . ":" . $request->password);
+            $newuser = User::Create([
+                "name" => $request->input("name"),
+                "image" => $request->input("image"),
+                "email" => $request->input("email"),
+                "password" => Hash::make($request->input("password")),
+                "age" => $request->input("age"),
+                'gender' => $request->input("gender"),
+                'country' => $request->input("country"),
+            ]);
+            $token1 = $newuser->createToken("auth_token");
 
             return response()->json([
                 'message' => 'User registered successfully',
                 'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
+                    'id' => $newuser->id,
+                    'name' => $newuser->name,
+                    'email' => $newuser->email,
                     'image' => null,
-                    'token' => $token,
+                    'gender' => $newuser->gender,
+                    'country' => $newuser->country,
+                    'age' => $newuser->age,
+                    'token' => $token1->plainTextToken,
                 ]
             ], Response::HTTP_OK);
-        } catch (ValidationException $e) {
-
-            return response()->json([
-                'message' => 'some information are not valid',
-            ], Response::HTTP_BAD_REQUEST);
         } catch (\Exception $e) {
             // \Log::error('User registration error: ' . $e->getMessage());
 
@@ -89,7 +87,7 @@ class UserController extends Controller
             // if the user exists in the DB
             if ($user && Hash::check($request->password, $user->password)) {
 
-                $token = base64_encode($user->name . ":" . $request->password);
+                $token1 = $user->createToken("auth_token");
 
                 return response()->json([
                     "message" => "Login successful! Welcome back.",
@@ -97,8 +95,11 @@ class UserController extends Controller
                         'id' => $user->id,
                         'name' => $user->name,
                         'email' => $user->email,
-                        'image' => null,
-                        'token' => $token,
+                        'image' => $user->image_reference,
+                        'age' => $user->age,
+                        'gender' => $user->gender,
+                        'country' => $user->country,
+                        'token' => $token1->plainTextToken,
                     ],
                 ], Response::HTTP_OK);
             } else {
@@ -127,6 +128,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json(['message' => 'image not valid'], 400);
         }
+
         $user = User::where('id', '=', $request->userId)->first();
 
         if (!$user) {
@@ -135,29 +137,17 @@ class UserController extends Controller
 
         try {
             // Check if the user already has a profile picture
-            if ($user->image_refrence) {
-                Storage::delete($user->image_refrence);
-
-                $path = $request->file('image')->store('profile_pictures');
-                $user->image_refrence = $path;
-                $user->save();
-
-                $imageUrl = Storage::url($path);
-
-                return response()->json([
-                    'image' => $imageUrl,
-                    'message' => 'Profile picture updated successfully.'
-                ], 200);
+            if ($user->image_reference) {
+                Storage::delete($user->image_reference);
             }
 
-            // User doesn't have a profile picture, handle the first-time upload logic here
-            $path = $request->file('image')->store('profile_pictures');
+            $path = $request->file('image')->store('public');
 
             // Update the user's profile picture field in the database
-            $user->image_refrence = $path;
+            $user->image_reference = "http://127.0.0.1:8000/storage/app/$path";
             $user->save();
 
-            $imageUrl = Storage::url($path);
+            $imageUrl = "http://127.0.0.1:8000/storage/app/$path";
 
             return response()->json([
                 'image' => $imageUrl,
@@ -165,10 +155,41 @@ class UserController extends Controller
             ], 200);
         } catch (\Exception $e) {
             return response()->json(
-                ['message' => 'An error occurred while uploading the image.'],
+                ['message' => $e->getMessage()],
                 500
             );
         }
     }
+
+    public function delete_image(Request $request)
+    {
+        $user = User::where('id', '=', $request->userId)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        try {
+            // Check if the user already has a profile picture
+            if ($user->image_reference) {
+                Storage::delete($user->image_reference);
+            }
+
+            // Update the user's profile picture field in the database
+            $user->image_reference = null;
+            $user->save();
+
+            return response()->json([
+                'image' => $user->image_reference,
+                'message' => 'Profile picture deleted successfully.'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(
+                ['message' => $e->getMessage()],
+                500
+            );
+        }
+    }
+
 
 }
