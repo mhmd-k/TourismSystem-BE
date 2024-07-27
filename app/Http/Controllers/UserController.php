@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Rating;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -52,6 +53,14 @@ class UserController extends Controller
                     'country' => $newuser->country,
                     'age' => $newuser->age,
                     'token' => $token1->plainTextToken,
+                    'ratings' => [
+                        'restaurant' => 0,
+                        'shopping' => 0,
+                        'night' => 0,
+                        'old' => 0,
+                        'natural' => 0,
+                        'hotel' => 0,
+                    ],
                 ]
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -89,6 +98,28 @@ class UserController extends Controller
 
                 $token1 = $user->createToken("auth_token");
 
+                // Calculate average ratings
+                $averageRatings = [
+                    'restaurant' => (float) (Rating::where('user_id', $user->id)
+                        ->where('place_type', 'restaurant')
+                        ->avg('stars') ?? 0),
+                    'shopping' => (float) (Rating::where('user_id', $user->id)
+                        ->where('place_type', 'shopping')
+                        ->avg('stars') ?? 0),
+                    'night' => (float) (Rating::where('user_id', $user->id)
+                        ->where('place_type', 'night')
+                        ->avg('stars') ?? 0),
+                    'old' => (float) (Rating::where('user_id', $user->id)
+                        ->where('place_type', 'old')
+                        ->avg('stars') ?? 0),
+                    'natural' => (float) (Rating::where('user_id', $user->id)
+                        ->where('place_type', 'natural')
+                        ->avg('stars') ?? 0),
+                    'hotel' => (float) (Rating::where('user_id', $user->id)
+                        ->where('place_type', 'hotel')
+                        ->avg('stars') ?? 0),
+                ];
+
                 return response()->json([
                     "message" => "Login successful! Welcome back.",
                     'user' => [
@@ -100,6 +131,7 @@ class UserController extends Controller
                         'gender' => $user->gender,
                         'country' => $user->country,
                         'token' => $token1->plainTextToken,
+                        'ratings' => $averageRatings
                     ],
                 ], Response::HTTP_OK);
             } else {
