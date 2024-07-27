@@ -9,7 +9,7 @@ class NaturalPlace extends Model
 {
     use HasFactory;
 
-    protected $table = 'natural_place';
+    protected $table = 'naturalplace';
     protected $fillable = ['name', 'location', 'address', 'city_id', 'description', 'time'];
 
     public function city()

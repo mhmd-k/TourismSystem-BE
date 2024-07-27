@@ -126,7 +126,7 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['message' => 'image not valid'], 400);
+            return response()->json(['message' => 'Image not valid'], 400);
         }
 
         $user = User::where('id', '=', $request->userId)->first();
@@ -144,10 +144,10 @@ class UserController extends Controller
             $path = $request->file('image')->store('public');
 
             // Update the user's profile picture field in the database
-            $user->image_reference = "http://127.0.0.1:8000/storage/app/$path";
+            $user->image_reference = $path;
             $user->save();
 
-            $imageUrl = "http://127.0.0.1:8000/storage/app/$path";
+            $imageUrl = Storage::url($path);
 
             return response()->json([
                 'image' => $imageUrl,

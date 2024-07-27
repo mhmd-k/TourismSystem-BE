@@ -9,7 +9,7 @@ class OldPlace extends Model
 {
     use HasFactory;
 
-    protected $table = 'old_place';
+    protected $table = 'oldplace';
     protected $fillable = ['name', 'location', 'address', 'city_id', 'description', 'time', 'price'];
 
     public function city()

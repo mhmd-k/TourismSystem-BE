@@ -12,11 +12,8 @@ class Trip extends Model
     protected $table = 'trip';
     protected $fillable = [
         'user_id',
-        'trip_name',
         'country',
-        'status',
-        'total_cost',
-        'form_city',
+        'from_city',
         'number_of_people',
         'number_of_days',
         'budget',

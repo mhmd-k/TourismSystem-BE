@@ -10,6 +10,7 @@ use App\Models\OldPlace;
 use App\Models\NightPlace;
 use App\Models\ShoopingPlace;
 use App\Models\City;
+use App\Models\ShoppingPlace;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -35,7 +36,7 @@ class SearchController extends Controller
                 'restaurant' => Resturant::class,
                 'old_place' => OldPlace::class,
                 'night_place' => NightPlace::class,
-                'shopping_place' => ShoopingPlace::class,
+                'shopping_place' => ShoppingPlace::class,
                 'natural_place' => NaturalPlace::class,
             ];
 

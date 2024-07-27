@@ -11,11 +11,11 @@ use App\Services\GenerateTrip\CustomGraph;
 use App\Services\GenerateTrip\DataImport;
 use App\Services\GenerateTrip\DijkstraAlgorithm;
 
-use Fhaculty\Graph\Graph ;
+use Fhaculty\Graph\Graph;
 use Fhaculty\Graph\Vertex;
 use Fhaculty\Graph\Edge\Base;
-use Fhaculty\Graph\Edge\Directed ;
-use Fhaculty\Graph\Attribute\AttributeBagNamespaced ;
+use Fhaculty\Graph\Edge\Directed;
+use Fhaculty\Graph\Attribute\AttributeBagNamespaced;
 use Fhaculty\Graph\Set\Vertices;
 use Graphp\GraphViz\GraphViz;
 
@@ -64,23 +64,23 @@ class GenerateTripController extends Controller
     }
     public static function transportation_time($transportation_distance, $transportation_method)
     {
-        if($transportation_method == "plane") {
+        if ($transportation_method == "plane") {
             $transportation_time = ceil((($transportation_distance / 1000) / 800) * 60);
 
-        } elseif($transportation_method == "car") {
+        } elseif ($transportation_method == "car") {
             $transportation_time = ceil((($transportation_distance / 1000) / 70) * 60);
 
         } else {
             $transportation_time = ceil((($transportation_distance / 1000) / 5) * 60);
         }
-        return  $transportation_time;
+        return $transportation_time;
     }
 
     public static function Trip_travel_cost($array1, $from_city, $N_people)
     {
         $Trip_travel_cost = [];
-        for ($c = 0 ; $c <= (count($array1) - 1) ;$c++) {
-            if($c == 0) {
+        for ($c = 0; $c <= (count($array1) - 1); $c++) {
+            if ($c == 0) {
                 $sourcecity_name = $from_city;
 
             } else {
@@ -92,9 +92,9 @@ class GenerateTripController extends Controller
             $sourcecityQuery = DB::table('City')->select('*')->where('name', $sourcecity_name)->first();     // fetch the source city information from database
             $sourcecity = $sourcecityQuery ? get_object_vars($sourcecityQuery) : null;  // to convert stdclass object to array
             $distance = self::haversineDistance($sourcecity, $destinationcity);
-            $travelmethod = CustomGraph::travell_method($distance) ;
-            if($travelmethod == "plane") {
-                $ticketprice = ($distance  / 1000) * 0.09 ;
+            $travelmethod = CustomGraph::travell_method($distance);
+            if ($travelmethod == "plane") {
+                $ticketprice = ($distance / 1000) * 0.09;
                 $TravelCost = $ticketprice * $N_people;
 
             } else {
@@ -108,12 +108,12 @@ class GenerateTripController extends Controller
         $fromCityQuery = DB::table('City')->select('*')->where('name', $from_city)->first();     // fetch the source city information from database
         $fromCity = $fromCityQuery ? get_object_vars($fromCityQuery) : null;  // to convert stdclass object to array
         $distance_return = self::haversineDistance($lastcity, $fromCity);
-        $travelmethod_return = CustomGraph::travell_method($distance_return) ;
-        if($travelmethod_return == "plane") {
-            $ticketprice_return  = ($distance_return  / 1000) * 0.09 ;
+        $travelmethod_return = CustomGraph::travell_method($distance_return);
+        if ($travelmethod_return == "plane") {
+            $ticketprice_return = ($distance_return / 1000) * 0.09;
             $TravelCost_return = $ticketprice_return * $N_people;
         } else {
-            $TravelCost_return = ($distance_return  / 1000) * 1.6;  // distance * cost of 1 litre fuel
+            $TravelCost_return = ($distance_return / 1000) * 1.6;  // distance * cost of 1 litre fuel
         }
         $Trip_travel_cost[$from_city] = $TravelCost_return;
         return $Trip_travel_cost;
@@ -133,8 +133,8 @@ class GenerateTripController extends Controller
 
         $reminderdays = $NumberOfDays % $N_cities;
 
-        foreach($Array as $city) {
-            if($reminderdays > 0) {
+        foreach ($Array as $city) {
+            if ($reminderdays > 0) {
                 $newArray[$city] = $cityNumberOfDays + 1;
             } else {
                 $newArray[$city] = $cityNumberOfDays;
@@ -150,13 +150,13 @@ class GenerateTripController extends Controller
     public static function selectRandomTypes($userplaces, $economicsituation, $previoustypeselected)              // A function for performs random selection and ensures diversity
     {
 
-        if($economicsituation == "green") {
-            $number_of_choices = count($userplaces)  ;
+        if ($economicsituation == "green") {
+            $number_of_choices = count($userplaces);
         }
-        if($economicsituation == "orange") {
+        if ($economicsituation == "orange") {
             $number_of_choices = count($userplaces) - 1;
         }
-        if($economicsituation == "red" ||  count($userplaces) < 3) {
+        if ($economicsituation == "red" || count($userplaces) < 3) {
             $number_of_choices = 2;
         }
 
@@ -167,7 +167,7 @@ class GenerateTripController extends Controller
 
         if ($reminder < 0) {
             $reminder = abs($reminder);
-            while($reminder > 0) {
+            while ($reminder > 0) {
                 $randomindex = random_int(0, count($previoustypeselected) - 1);
                 if (!in_array($previoustypeselected[$randomindex], $selected_types)) {
                     array_push($selected_types, $previoustypeselected[$randomindex]);
@@ -192,13 +192,14 @@ class GenerateTripController extends Controller
         $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
             cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
 
-        $distance = $angle *  6371000;
+        $distance = $angle * 6371000;
         return $distance;
     }
 
     public function generate(Request $request)       // A function for generate the trip
     {
-        //       try {
+
+        // try {
         $Data = $request->all();
         $user_id = $Data['user_id'];
         $fromCity = $Data['fromcity'];
@@ -209,12 +210,13 @@ class GenerateTripController extends Controller
         $preferedfood = $Data['preferedfood'];
         $Date = $Data['date'];
         $selectedplaces = $Data['places'];
-        if($Data['totalBudget'] == "Minimum") {
+        if ($Data['totalBudget'] == "Minimum") {
             $Budget = 500;
         }
-        if($Data['totalBudget'] == "Open") {
+        if ($Data['totalBudget'] == "Open") {
             $Budget = 500000;
-        } if($Data['totalBudget'] != "Minimum" && $Data['totalBudget'] != "Open") {
+        }
+        if ($Data['totalBudget'] != "Minimum" && $Data['totalBudget'] != "Open") {
             $Budget = $Data['totalBudget'];
         }
         $daysofcity = 0;
@@ -224,24 +226,34 @@ class GenerateTripController extends Controller
         $Totalcost = 0;
         $BudgetOfDay = 0;
         $TravelCost = 0;
-        $TravelCost_return = 0;
         $Trip_balancing = 0;
         $Budget_difference = 0;
-        $rest = false;
         $changecity = false;
         $lastday = false;
         $EconomicSituation = "orange";
         $previoustype = ['nightplace'];
         $visited = [];
         $response = [];       // response Array Initialization
-        $requiredFields = ['user_id','fromcity','tocountry','N.days','N.people','preferedplaces','preferedfood','date','totalBudget','places'
+        $requiredFields = [
+            'user_id',
+            'fromcity',
+            'tocountry',
+            'N.days',
+            'N.people',
+            'preferedplaces',
+            'preferedfood',
+            'date',
+            'totalBudget',
+            'places'
         ];
         $missingFields = [];
-        $end_des = ["id" => 1234567,"name" => "destination",
-        "lon" => 11.251828422382225,
-        "lat" => 40.803499350173176,
-        "price" => 0,
-        "placeType" => null,
+        $end_des = [
+            "id" => 1234567,
+            "name" => "destination",
+            "lon" => 11.251828422382225,
+            "lat" => 40.803499350173176,
+            "price" => 0,
+            "placeType" => null,
         ];
 
         foreach ($requiredFields as $field) {
@@ -292,10 +304,10 @@ class GenerateTripController extends Controller
 
         // fetch cities of the desination country
         $countrycitiesQuery = DB::table('City')
-        ->join('country', 'City.country', '=', 'country.country_name')
-        ->select('City.name as name', "city.capital")
-        ->where('country.country_name', '=', $toCountry)
-        ->get()->toArray();
+            ->join('country', 'City.country', '=', 'country.country_name')
+            ->select('City.name as name', "city.capital")
+            ->where('country.country_name', '=', $toCountry)
+            ->get()->toArray();
 
         if (empty($countrycitiesQuery)) {
             return response()->json(
@@ -317,7 +329,7 @@ class GenerateTripController extends Controller
         $part_of_travelcost = array_sum($Trip_total_travel_cost) / ($numberOfDays /*- count($countrycities)*/);
 
 
-        for ($i = 1 ; $i <= $numberOfDays ;$i++) {         // loop for every day in the trip
+        for ($i = 1; $i <= $numberOfDays; $i++) {         // loop for every day in the trip
             $travelmethod = null;
             $time = 0;
             $transportation_cost = 0;
@@ -327,12 +339,12 @@ class GenerateTripController extends Controller
             /*    if($i == $numberOfDays) {
                     $TravelCost_return =  $Trip_total_travel_cost[$fromCity];
                 }*/
-            $BudgetOfDay = floor((($Budget  - ($Totalcost - $TravelCost)) + $Trip_balancing) / ($numberOfDays - ($i - 1)));
+            $BudgetOfDay = floor((($Budget - ($Totalcost - $TravelCost)) + $Trip_balancing) / ($numberOfDays - ($i - 1)));
 
             $changecity = false;
             $TravelCost = 0;
             if ($i == 1) {        // Day1
-                $date = $Date ;
+                $date = $Date;
                 $destinationcityname = $countrycities[0];
                 $City_name = $countrycities[0];
                 $destinationcityQuery = DB::table('City')->select('*')->where('name', $destinationcityname)->first();     // fetch the destination city information from database
@@ -345,9 +357,9 @@ class GenerateTripController extends Controller
                 $lastcity = get_object_vars($lastcityQuery);  // to convert stdclass object to array
 
                 $distance_return = self::haversineDistance($lastcity, $From_city);
-                $travelmethod_return = CustomGraph::travell_method($distance_return) ;
-                if($travelmethod_return == "plane") {
-                    $ticketprice_return  = ($distance_return  / 1000) * 0.09 ;
+                $travelmethod_return = CustomGraph::travell_method($distance_return);
+                if ($travelmethod_return == "plane") {
+                    $ticketprice_return = ($distance_return / 1000) * 0.09;
 
                 }
 
@@ -359,21 +371,22 @@ class GenerateTripController extends Controller
                     );
                 }
                 $distance = self::haversineDistance($sourcecity, $destinationcity);
-                $travelmethod = CustomGraph::travell_method($distance) ;
-                $ticketprice = ($distance / 1000) * 0.09 ;
+                $travelmethod = CustomGraph::travell_method($distance);
+                $ticketprice = ($distance / 1000) * 0.09;
                 $TravelCost = $ticketprice * $numberOfPeople;
                 $TravelCost1 = $TravelCost;
 
                 // insert trip info into trip table
                 $tripid = DB::table('trip')->insertGetId(
-                    ['country' => $toCountry,
-                    'user_id' =>  $user_id,
-                    'from_city' => $sourcecity['city_id'],
-                    'budget' => $Data['totalBudget'],
-                    'number_of_people' => $numberOfPeople,
-                    'number_of_days' => $numberOfDays,
-                    'transportation' => $travelmethod,
-                    'trip_cost' => ceil($Totalcost),
+                    [
+                        'country' => $toCountry,
+                        'user_id' => $user_id,
+                        'from_city' => $sourcecity['city_id'],
+                        'budget' => $Data['totalBudget'],
+                        'number_of_people' => $numberOfPeople,
+                        'number_of_days' => $numberOfDays,
+                        'transportation' => $travelmethod,
+                        'trip_cost' => ceil($Totalcost),
                     ]
                 );
 
@@ -388,7 +401,7 @@ class GenerateTripController extends Controller
 
             } else { //other days
                 $date = date("Y-m-d", strtotime($date . ' +1 day'));
-                if($daysofcity > $schedule[$City_name]) { // check if we have to change city
+                if ($daysofcity > $schedule[$City_name]) { // check if we have to change city
                     $daysofcity = 1;
                     $Trip_balancing = 0;
                     $changecity = true;
@@ -396,14 +409,14 @@ class GenerateTripController extends Controller
                     $sourcecityQuery = DB::table('City')->select('*')->where('name', $City_name)->first();     // fetch the source city information from database
                     $sourcecity = get_object_vars($sourcecityQuery);  // to convert stdclass object to array
                     $cityindex += 1;
-                    $City_name =  $countrycities[$cityindex];
+                    $City_name = $countrycities[$cityindex];
                     $destinationcityQuery = DB::table('City')->select('*')->where('name', $City_name)->first();     // fetch the destination city information from database
                     $destinationcity = get_object_vars($destinationcityQuery);  // to convert stdclass object to array
 
                     $distance = self::haversineDistance($sourcecity, $destinationcity);
-                    $travelmethod = CustomGraph::travell_method($distance) ;
-                    if($travelmethod == "plane") {
-                        $ticketprice = ($distance / 1000) * 0.09 ;
+                    $travelmethod = CustomGraph::travell_method($distance);
+                    if ($travelmethod == "plane") {
+                        $ticketprice = ($distance / 1000) * 0.09;
                         $TravelCost = $ticketprice * $numberOfPeople;
                     } else {
                         $TravelCost = ($distance / 1000) * 1.6;  // distance * cost of 1 litre fuel
@@ -417,18 +430,18 @@ class GenerateTripController extends Controller
 
             //     }
 
-            if($i == $numberOfDays) {
+            if ($i == $numberOfDays) {
 
                 $lastday = true;
 
             }
 
-            if($changecity || $i == 1) {
+            if ($changecity || $i == 1) {
                 $index = 1;
             } else {
                 $index = 0;
             }
-            if($i == 1) {
+            if ($i == 1) {
                 $root = null;
             } else {
                 $root = $hotelAttributes;
@@ -436,23 +449,23 @@ class GenerateTripController extends Controller
 
             $custompreferedplaces = self::selectRandomTypes($preferedplaces, $EconomicSituation, $previoustype);
 
-            foreach($selectedplaces[ $City_name] as $citychoosentypes => $citychoosenplaces) {
+            foreach ($selectedplaces[$City_name] as $citychoosentypes => $citychoosenplaces) {
 
-                if($citychoosentypes === "resturant" || $citychoosentypes === "hotel") {
+                if ($citychoosentypes === "resturant" || $citychoosentypes === "hotel") {
                     continue;
                 } else {
 
-                    if(!empty($citychoosenplaces)) {
+                    if (!empty($citychoosenplaces)) {
 
-                        foreach($citychoosenplaces as $citychoosenplace) {
+                        foreach ($citychoosenplaces as $citychoosenplace) {
 
-                            if(!in_array($citychoosenplace['name'], $visited)) {
+                            if (!in_array($citychoosenplace['name'], $visited)) {
                                 $userplacestime[$citychoosentypes] = $citychoosenplace['time'];
-                                if(!in_array($citychoosentypes, $custompreferedplaces)) {
+                                if (!in_array($citychoosentypes, $custompreferedplaces)) {
                                     array_unshift($custompreferedplaces, $citychoosentypes);
                                 } else {
                                     $key1 = array_search($citychoosentypes, $custompreferedplaces);
-                                    if ($key1 !== false && $key1 >  0) {
+                                    if ($key1 !== false && $key1 > 0) {
                                         unset($custompreferedplaces[$key1]);
                                         $custompreferedplaces = array_values($custompreferedplaces);
                                         array_unshift($custompreferedplaces, $citychoosentypes);
@@ -465,14 +478,15 @@ class GenerateTripController extends Controller
                 }
             }
 
-            if(array_sum($userplacestime) >= 4) {
+            if (array_sum($userplacestime) >= 4) {
                 $custompreferedplaces = array_keys($userplacestime);
-                if($schedule[$City_name] > 1) {
+                if ($schedule[$City_name] > 1) {
                     $half_size = ceil(count($custompreferedplaces) / 2);
                     $custompreferedplaces = array_slice($custompreferedplaces, 0, $half_size);
 
                 }
-            };
+            }
+            ;
 
             $places_day = DataImport::importData($custompreferedplaces, $Data, $City_name, $travelmethod, $BudgetOfDay, $numberOfPeople, $visited, $selectedplaces, $lastday);
             $graph = new Graph();
@@ -486,7 +500,7 @@ class GenerateTripController extends Controller
             $path = end($paths);
             foreach ($graph1->getVertices() as $vertex) {
                 $node_id = $vertex->getId();
-                if(in_array($node_id, $path)) {
+                if (in_array($node_id, $path)) {
                     $vertexes[] = $vertex;
                 }
             }
@@ -498,7 +512,7 @@ class GenerateTripController extends Controller
 
             $lastnode = CustomGraph::createNode($graph1, $hotelAttributes);
             CustomGraph::addWeightedEdge($graph1->getVertex($pre_lastnodeid), $lastnode);
-            if($lastday) {
+            if ($lastday) {
                 $the_lastnode = CustomGraph::createNode($graph1, $places_day['Airport'][0]);
                 CustomGraph::addWeightedEdge($lastnode, $the_lastnode);
 
@@ -506,14 +520,15 @@ class GenerateTripController extends Controller
             }
 
 
-            $previoustype =  $custompreferedplaces;
+            $previoustype = $custompreferedplaces;
             // insert trip info into tripday table
             $dayid = DB::table('tripday')->insertGetId(
-                ['trip_id' => $tripid,
-                'city_id' =>  $places_day['Currentcity']['city_id'],
-                'date' => $date,
-                'hotel_id' => $hotelAttributes['id'],
-                'transportaition_method' => $travelmethod
+                [
+                    'trip_id' => $tripid,
+                    'city_id' => $places_day['Currentcity']['city_id'],
+                    'date' => $date,
+                    'hotel_id' => $hotelAttributes['id'],
+                    'transportation_method' => $travelmethod
                 ]
             );
 
@@ -534,15 +549,15 @@ class GenerateTripController extends Controller
                 $NodeAttributes = $Attributes->getAttributes();
 
                 $visited[] = $NodeAttributes['name'];
-                if($isFirstnode == true) {
-                    if($NodeAttributes['placeType'] == 'hotel' && $changecity) {
+                if ($isFirstnode == true) {
+                    if ($NodeAttributes['placeType'] == 'hotel' && $changecity) {
                         $dayPlaces[$n] = $Attributes->getAttributes();
                         $dayPlaces[$n]['price'] = 0;
                         $dayPlaces[$n]['transportaionMethod'] = null;
                         $dayPlaces[$n]['distancefromlastplace'] = 0;
                         $dayPlaces[$n]['transportaioncost'] = 0;
 
-                    } elseif($NodeAttributes['placeType'] == 'airport') {
+                    } elseif ($NodeAttributes['placeType'] == 'airport') {
                         $Attributes->setAttribute("transportaionMethod", $travelmethod);
                         $dayPlaces[$n] = $Attributes->getAttributes();
                         $dayPlaces[$n]['distancefromlastplace'] = $distance;
@@ -551,7 +566,7 @@ class GenerateTripController extends Controller
                         $dayPlaces[$n]['ticketprice'] = ceil($ticketprice);
                         $dayPlaces[$n]['money_amount'] = ceil($TravelCost);
                         $cost += ceil($TravelCost);
-                    } elseif($NodeAttributes['placeType'] == 'hotel' && $changecity == false) {
+                    } elseif ($NodeAttributes['placeType'] == 'hotel' && $changecity == false) {
                         $dayPlaces[$n] = $Attributes->getAttributes();
                         $dayPlaces[$n]['transportaionMethod'] = null;
                         $dayPlaces[$n]['distancefromlastplace'] = 0;
@@ -562,27 +577,27 @@ class GenerateTripController extends Controller
                     }
 
                 } else {
-                    foreach($node->getEdgesIn() as $edge_in) {
+                    foreach ($node->getEdgesIn() as $edge_in) {
                         $dayPlaces[$n] = $Attributes->getAttributes();
                         $dayPlaces[$n]['transportaionMethod'] = $edge_in->getAttribute('travelMethod');
                         $dayPlaces[$n]['distancefromlastplace'] = ceil($edge_in->getAttribute('distance'));
                         $transportation_time = self::transportation_time($dayPlaces[$n]['distancefromlastplace'], $dayPlaces[$n]['transportaionMethod']);
                         $dayPlaces[$n]['transportation_time'] = $transportation_time;
-                        if($dayPlaces[$n]['transportaionMethod'] == "car") {
+                        if ($dayPlaces[$n]['transportaionMethod'] == "car") {
                             $dayPlaces[$n]['transportaioncost'] = ceil(($edge_in->getAttribute('distance') / 1000) * 1.6); // 1.6 is avg of Taxi cost in 1KM
                         } else {
                             $dayPlaces[$n]['transportaioncost'] = 0;
                         }
                         $transportation_cost += $dayPlaces[$n]['transportaioncost'];
-                        if(($dayPlaces[$n]['placeType'] == "hotel" && $hotel_check == false)) {
+                        if (($dayPlaces[$n]['placeType'] == "hotel" && $hotel_check == false)) {
                             $hotel_price = $dayPlaces[$n]['price'] * $numberOfPeople;
                             $dayPlaces[$n]['money_amount'] = $hotel_price;
-                            $cost += $hotel_price ;
+                            $cost += $hotel_price;
                             $hotel_check = true;
-                        } elseif($dayPlaces[$n]['placeType'] != "airport" && $dayPlaces[$n]['placeType'] != "hotel") {
+                        } elseif ($dayPlaces[$n]['placeType'] != "airport" && $dayPlaces[$n]['placeType'] != "hotel") {
                             $cost += $dayPlaces[$n]['price'] * $numberOfPeople;
                             $dayPlaces[$n]['money_amount'] = $dayPlaces[$n]['price'] * $numberOfPeople;
-                        } elseif($dayPlaces[$n]['placeType'] == "airport") {
+                        } elseif ($dayPlaces[$n]['placeType'] == "airport") {
                             $dayPlaces[$n]['ticketprice_return'] = ceil($ticketprice_return);
                             $dayPlaces[$n]['money_amount'] = ceil($ticketprice_return) * $numberOfPeople;
                             $cost += ceil($dayPlaces[$n]['money_amount']);
@@ -594,40 +609,43 @@ class GenerateTripController extends Controller
 
                 $place_type = $dayPlaces[$n]['placeType'];
 
-                if($place_type == "hotel") {
+                if ($place_type == "hotel") {
 
                     DB::table('dayplaces')->insert(
-                        ['day_id' => $dayid,
-                         'place_id' =>  $dayPlaces[$n]['id'],
-                         'place_type' =>  $place_type,
-                         'index' =>  $n  ,
-                         'transport_method' => $dayPlaces[$n]['transportaionMethod'],
-                         'money_amount' => $hotel_price,
-                         'pre_distance' => $dayPlaces[$n]['distancefromlastplace']
-                         ]
+                        [
+                            'day_id' => $dayid,
+                            'place_id' => $dayPlaces[$n]['id'],
+                            'place_type' => $place_type,
+                            'index' => $n,
+                            'transport_method' => $dayPlaces[$n]['transportaionMethod'],
+                            'money_amount' => $hotel_price,
+                            'pre_distance' => $dayPlaces[$n]['distancefromlastplace']
+                        ]
                     );
 
-                } elseif($place_type == "airport") {
+                } elseif ($place_type == "airport") {
                     DB::table('dayplaces')->insert(
-                        ['day_id' => $dayid,
-                        'place_id' =>  $dayPlaces[$n]['id'],
-                        'place_type' =>  $place_type,
-                        'index' =>  $n  ,
-                        'transport_method' => "plane",
-                        'money_amount' => ceil($ticketprice *  $numberOfPeople),
-                        'pre_distance' => 0
+                        [
+                            'day_id' => $dayid,
+                            'place_id' => $dayPlaces[$n]['id'],
+                            'place_type' => $place_type,
+                            'index' => $n,
+                            'transport_method' => "plane",
+                            'money_amount' => ceil($ticketprice * $numberOfPeople),
+                            'pre_distance' => 0
                         ]
                     );
 
                 } else {
                     DB::table('dayplaces')->insert(
-                        ['day_id' => $dayid,
-                        'place_id' =>  $dayPlaces[$n]['id'],
-                        'place_type' =>  $place_type,
-                        'index' =>  $n ,
-                        'transport_method' => $dayPlaces[$n]['transportaionMethod'],
-                        'money_amount' => ceil($dayPlaces[$n]['price'] * $numberOfPeople),
-                        'pre_distance' => $dayPlaces[$n]['distancefromlastplace']
+                        [
+                            'day_id' => $dayid,
+                            'place_id' => $dayPlaces[$n]['id'],
+                            'place_type' => $place_type,
+                            'index' => $n,
+                            'transport_method' => $dayPlaces[$n]['transportaionMethod'],
+                            'money_amount' => ceil($dayPlaces[$n]['price'] * $numberOfPeople),
+                            'pre_distance' => $dayPlaces[$n]['distancefromlastplace']
                         ]
                     );
                 }
@@ -639,61 +657,66 @@ class GenerateTripController extends Controller
             $cost += $transportation_cost;
 
             $trip_days["day_" . $i]['EconomicSituation'] = $EconomicSituation;
-            $Budget_difference = ($BudgetOfDay) - ceil($cost - $TravelCost) ;
+            $Budget_difference = ($BudgetOfDay) - ceil($cost - $TravelCost);
 
             $Trip_balancing += $Budget_difference;
 
-            if($Trip_balancing < 0) {
+            if ($Trip_balancing < 0) {
                 $EconomicSituation = "red";
-            } elseif($Trip_balancing > 75) {
+            } elseif ($Trip_balancing > 75) {
                 $EconomicSituation = "green";
             } else {
                 $EconomicSituation = "orange";
             }
 
-            $Totalcost += $cost ;
+            $Totalcost += $cost;
 
-            if($i ==  $numberOfDays) {
+            if ($i == $numberOfDays) {
 
                 DB::table('trip')
-                -> where('trip.id', '=', $tripid)
-                ->update(['trip.trip_cost' => $Totalcost]);
+                    ->where('trip.id', '=', $tripid)
+                    ->update(['trip.trip_cost' => $Totalcost]);
             }
 
 
             DB::table('tripday')
-            -> where('trip_id', '=', $tripid)
-            -> where('id', '=', $dayid)
-            ->update(['day_cost' => $cost]);
+                ->where('trip_id', '=', $tripid)
+                ->where('id', '=', $dayid)
+                ->update(['day_cost' => $cost]);
 
             $trip_days["day_" . $i]['dayId'] = $dayid;
 
             $trip_days["day_" . $i]['custompreferedplaces'] = $custompreferedplaces;
-            $trip_days["day_" . $i]['$Budget_difference'] = $Budget_difference ;
-            $trip_days["day_" . $i]['$BudgetOfDay'] = $BudgetOfDay ;
-            $trip_days["day_" . $i]['transportation_cost'] = $transportation_cost ;
-            $trip_days["day_" . $i]['Trip_balancing '] = $Trip_balancing ;
+            $trip_days["day_" . $i]['$Budget_difference'] = $Budget_difference;
+            $trip_days["day_" . $i]['$BudgetOfDay'] = $BudgetOfDay;
+            $trip_days["day_" . $i]['transportation_cost'] = $transportation_cost;
+            $trip_days["day_" . $i]['Trip_balancing '] = $Trip_balancing;
 
             $trip_days["day_" . $i]['date'] = $date;
             $trip_days["day_" . $i]['city'] = $places_day['Currentcity'];
-            $trip_days["day_" . $i]['neededMony'] = ceil($cost) ;
+            $trip_days["day_" . $i]['neededMony'] = ceil($cost);
 
             // flightReservation
-            if($travelmethod == "plane") {
-                if($i == 1) {
+            if ($travelmethod == "plane") {
+                if ($i == 1) {
                     $travelfromcity = $fromCity;
                 } else {
                     $travelfromcity = $sourcecity['name'];
                 }
-                $response['flightReservation']["day_" . $i] = [ "airportId" => $places_day['Airport'][0]['id'] ,"fromCity" => $travelfromcity ,
-                "airportName" => $places_day['Airport'][0]['name'],"address" => $places_day['Airport'][0]['address'],
-                "price" => ceil($ticketprice) ,"toatlAmountOfMony" => ceil($ticketprice * $Data['N.people']) ,"location" => $places_day['Airport'][0]['location']
-                  ];
+                $response['flightReservation']["day_" . $i] = [
+                    "airportId" => $places_day['Airport'][0]['id'],
+                    "fromCity" => $travelfromcity,
+                    "airportName" => $places_day['Airport'][0]['name'],
+                    "address" => $places_day['Airport'][0]['address'],
+                    "price" => ceil($ticketprice),
+                    "toatlAmountOfMony" => ceil($ticketprice * $Data['N.people']),
+                    "location" => $places_day['Airport'][0]['location']
+                ];
             }
 
             // "hotelReservation"
-            if($i == 1 || $changecity == true) {
-                $hotelnode = $graph1-> getvertex($path[1]);    // get hotel node by id
+            if ($i == 1 || $changecity == true) {
+                $hotelnode = $graph1->getvertex($path[1]);    // get hotel node by id
 
                 $hotelAttr = $hotelnode->getAttributeBag();  // get the attributes bag
                 $response['hotelReservation']["day_" . $i] = $hotelAttr->getAttributes();   // get the hotel node attribute
@@ -702,21 +725,20 @@ class GenerateTripController extends Controller
 
             $trip_days["day_" . $i]['dayPlaces'] = $dayPlaces;
 
-            $response['tripDays'] = $trip_days ;
+            $response['tripDays'] = $trip_days;
 
         }
 
         $ticketprice = 0;
-        $response['TotalCost'] = ceil($Totalcost) ;
+        $response['TotalCost'] = ceil($Totalcost);
 
 
         return response()->json(['trip' => $response], Response::HTTP_OK);
-
-        //      } catch (\Exception $error) {
-        return response()->json(
-            ['error' => $error->getMessage()],
-            Response::HTTP_INTERNAL_SERVER_ERROR
-        );
-        //     }
+        // } catch (\Exception $error) {
+        //     return response()->json(
+        //         ['error' => $error->getCode()],
+        //         Response::HTTP_INTERNAL_SERVER_ERROR
+        //     );
+        // }
     }
 }

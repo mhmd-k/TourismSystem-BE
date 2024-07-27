@@ -9,7 +9,7 @@ class NightPlace extends Model
 {
     use HasFactory;
 
-    protected $table = 'night_place';
+    protected $table = 'nightplace';
     protected $fillable = ['name', 'location', 'address', 'city_id', 'description', 'time', 'price'];
 
     public function city()
