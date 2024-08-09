@@ -11,6 +11,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Forms\Components\Select;
+use Laravel\Prompts\SearchPrompt;
 
 class UserResource extends Resource
 {
@@ -32,9 +33,9 @@ class UserResource extends Resource
                         'Female' => 'Female',
                     ])
                     ->required(),
-                Select::make('country')
-                    ->relationship('country', 'country_name')
-                    ->required(),
+                // Select::make('country')
+                //     ->relationship('country', 'country_name')
+                //     ->required(),
             ])->columns(1);
     }
 
@@ -47,7 +48,7 @@ class UserResource extends Resource
                 TextColumn::make('password'),
                 TextColumn::make('age'),
                 TextColumn::make('gender')->label('Gender'),
-                TextColumn::make('country')->label('Country'),
+                // TextColumn::make('country.country_name')->label('Country'),
             ])
             ->filters([
                 //

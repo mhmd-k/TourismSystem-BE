@@ -9,6 +9,10 @@ class HotelReservation extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
+    protected $table = 'hotel_reservations';
+
     protected $fillable = [
         'trip_id',
         'hotel_id',
@@ -17,7 +21,8 @@ class HotelReservation extends Model
         'name_on_card',
         'paid_amount',
         'date',
-        'trip_id'
+        'trip_id',
+        'user_id',
     ];
 
     public function trip()

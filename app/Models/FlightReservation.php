@@ -9,7 +9,9 @@ class FlightReservation extends Model
 {
     use HasFactory;
 
-    protected $table = 'flight_reservation';
+    public $timestamps = false;
+
+    protected $table = 'flight_reservations';
 
     protected $fillable = [
         'user_id',

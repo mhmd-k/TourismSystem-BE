@@ -32,12 +32,12 @@ class SearchController extends Controller
             $places = [];
 
             $placeModels = [
-                'hotel' => Hotel::class,
-                'restaurant' => Resturant::class,
-                'old_place' => OldPlace::class,
-                'night_place' => NightPlace::class,
-                'shopping_place' => ShoppingPlace::class,
-                'natural_place' => NaturalPlace::class,
+                'hot' => Hotel::class,
+                'res' => Resturant::class,
+                'old' => OldPlace::class,
+                'nig' => NightPlace::class,
+                'sho' => ShoppingPlace::class,
+                'nat' => NaturalPlace::class,
             ];
 
             if ($placeType) {
